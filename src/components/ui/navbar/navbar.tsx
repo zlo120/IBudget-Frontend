@@ -1,5 +1,5 @@
 import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -20,11 +20,15 @@ const Navbar = () => {
             sx={{ zIndex: (theme) => theme.zIndex.drawer + 2 }}
             className={`${classes.root}`}>
         <Toolbar>
-            <Icon>
-            <RequestQuoteIcon />
+            <Icon>                
+                <Link href="/app/dashboard" style={{color: "#fff", textDecoration: "none"}}>
+                    <RequestQuoteIcon />
+                </Link>
             </Icon>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                IBudget
+                <Link href="/app/dashboard" style={{color: "#fff", textDecoration: "none"}}>
+                    IBudget
+                </Link>
             </Typography>   
             <div className={`${classes.iconSection}`}>
                 <IconButton

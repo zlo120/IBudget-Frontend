@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 
 const useStyles = styles;
 const drawerWidth = 240;
-const icon = (index: number) => {
+const getIcon = (index: number) => {
     switch(index) {
         case 0:
             return (<SpaceDashboardOutlined />);
@@ -30,17 +30,36 @@ const icon = (index: number) => {
             return (<FmdBad />);
     }
 }
+const getHref = (index: number) => {
+    switch(index) {
+        case 0:
+            return "/app/dashboard";
+        case 1:
+            return "/app/search";
+        case 2:
+            return "/app/mybudget";
+        case 3:
+            return "/app/monthlysummary";
+        case 4:
+            return "/app/thisweek";
+        case 5:
+            return "/app/uploadcsv";
+        default:
+            return "/app/dashboard";
+    }
+}
+const sideBarItems = ['Dashboard', 'Search', 'My Budget', 'Monthly Summary', 'This Week', 'Upload CSV'];
 const drawer = (
     <Box sx={{overflow: "auto"}}>
         <List>
-        {['Dashboard', 'Search', 'My Budget', 'Monthly Summary', 'This Week', 'Upload CSV'].map((text, index) => (
+        {sideBarItems.map((text, index) => (
             <ListItem key={text} disablePadding>
-            <ListItemButton>
-                <ListItemIcon>
-                {icon(index)}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-            </ListItemButton>
+                <ListItemButton href={getHref(index)}>
+                    <ListItemIcon>
+                        {getIcon(index)}
+                    </ListItemIcon>
+                    <ListItemText primary={text} />
+                </ListItemButton>
             </ListItem>
         ))}
         </List>
