@@ -13,62 +13,50 @@ import styles from './navbar.styles';
 
 const useStyles = styles;
 const Navbar = () => {
-    const wip = true;
     const { classes } = useStyles();
     return (
-    <>
-    {wip ? (
-        <AppBar
-            position="static"
-            className={`${classes.wipHeader}`}
-        >
-            <Typography variant="body1">
-                This site is still a work in progress.
-            </Typography>
-        </AppBar>
-        ) : null }
-        <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="static" className={`${classes.root}`}>
-            <Toolbar>
-                <Icon>
-                <RequestQuoteIcon />
-                </Icon>
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    IBudget
-                </Typography>   
-                <div className={`${classes.iconSection}`}>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 1 }}
-                    >
-                        <HelpOutline />
-                    </IconButton>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 1 }}
-                    >
-                        <Settings />
-                    </IconButton>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 1 }}
-                    >
-                        <Avatar sx={{ bgcolor: grey[500] }}>ZL</Avatar>
-                    </IconButton>
-                </div>
-            </Toolbar>
-            </AppBar>
-        </Box>
-    </>
+        <AppBar 
+            position="fixed" 
+            sx={{ zIndex: (theme) => theme.zIndex.drawer + 2 }}
+            className={`${classes.root}`}>
+        <Toolbar>
+            <Icon>
+            <RequestQuoteIcon />
+            </Icon>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                IBudget
+            </Typography>   
+            <div className={`${classes.iconSection}`}>
+                <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    sx={{ mr: 1 }}
+                >
+                    <HelpOutline />
+                </IconButton>
+                <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    sx={{ mr: 1 }}
+                >
+                    <Settings />
+                </IconButton>
+                <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    sx={{ mr: 1 }}
+                >
+                    <Avatar sx={{ bgcolor: grey[500] }}>ZL</Avatar>
+                </IconButton>
+            </div>
+        </Toolbar>
+    </AppBar>
   )
 }
 
