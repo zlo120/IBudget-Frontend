@@ -1,0 +1,75 @@
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Icon from '@mui/material/Icon';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
+import HelpOutline from '@mui/icons-material/HelpOutline';
+import { Settings } from '@mui/icons-material';
+import Avatar from '@mui/material/Avatar';
+import { grey } from '@mui/material/colors';
+import styles from './navbar.styles';
+
+const useStyles = styles;
+const Navbar = () => {
+    const wip = true;
+    const { classes } = useStyles();
+    return (
+    <>
+    {wip ? (
+        <AppBar
+            position="static"
+            className={`${classes.wipHeader}`}
+        >
+            <Typography variant="body1">
+                This site is still a work in progress.
+            </Typography>
+        </AppBar>
+        ) : null }
+        <Box sx={{ flexGrow: 1 }}>
+            <AppBar position="static" className={`${classes.root}`}>
+            <Toolbar>
+                <Icon>
+                <RequestQuoteIcon />
+                </Icon>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                    IBudget
+                </Typography>   
+                <div className={`${classes.iconSection}`}>
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        sx={{ mr: 1 }}
+                    >
+                        <HelpOutline />
+                    </IconButton>
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        sx={{ mr: 1 }}
+                    >
+                        <Settings />
+                    </IconButton>
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        sx={{ mr: 1 }}
+                    >
+                        <Avatar sx={{ bgcolor: grey[500] }}>ZL</Avatar>
+                    </IconButton>
+                </div>
+            </Toolbar>
+            </AppBar>
+        </Box>
+    </>
+  )
+}
+
+export default Navbar;
