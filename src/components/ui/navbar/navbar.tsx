@@ -21,12 +21,12 @@ const Navbar = () => {
             className={`${classes.root}`}>
         <Toolbar>
             <Icon>                
-                <Link href="/app/dashboard" style={{color: "#fff", textDecoration: "none"}}>
+                <Link href="/" style={{color: "#fff", textDecoration: "none"}}>
                     <RequestQuoteIcon />
                 </Link>
             </Icon>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                <Link href="/app/dashboard" style={{color: "#fff", textDecoration: "none"}}>
+                <Link href="/" style={{color: "#fff", textDecoration: "none"}}>
                     IBudget
                 </Link>
             </Typography>   

@@ -1,28 +1,28 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createBrowserRouter } from 'react-router-dom';
 import AppRoot from './app/roots/root';
-import FinancialRoot from './app/roots/financialroot';
 
 const createRouter = (queryClient: QueryClient) => 
     createBrowserRouter([
         {
-            path: '/app',
+            path: '/',
             element: (
                 <AppRoot />
             ),
             children: [
                 {
-                    path: 'search',
+                    index: true,
+                    path: '/',
                     lazy: async () => {
                         const { Search } = await import('./app/search');
                         return { Component: Search };
                     },
                 },
                 {
-                    path: 'mybudget',
+                    path: '/search',
                     lazy: async () => {
-                        const { MyBudget } = await import('./app/mybudget');
-                        return { Component: MyBudget };
+                        const { Search } = await import('./app/search');
+                        return { Component: Search };
                     },
                 },
                 {
@@ -39,28 +39,6 @@ const createRouter = (queryClient: QueryClient) =>
                         return { Component: UploadCSV };
                     },
                 },
-                {
-                    path: "financial",
-                    element: (
-                        <FinancialRoot />
-                    ),
-                    children: [
-                        {
-                            path: "income",
-                            lazy: async () => {
-                                const { AddIncome } = await import('./app/addincome');
-                                return { Component: AddIncome };
-                            }
-                        },
-                        {
-                            path: "expense",
-                            lazy: async () => {
-                                const { AddExpense } = await import('./app/addexpense');
-                                return { Component: AddExpense };
-                            }
-                        }
-                    ]
-                }
             ]
         }
     ]);

@@ -27,13 +27,13 @@ const getIcon = (index: number) => {
 const getHref = (index: number) => {
     switch(index) {
         case 0:
-            return "/app/search";
+            return "/search";
         case 1:
-            return "/app/uploadcsv";
+            return "/uploadcsv";
         case 2:
-            return "/app/thismonth";
+            return "/thismonth";
         default:
-            return "/app/search";
+            return "/search";
     }
 }
 const sideBarItems = ['Search', 'Upload CSV', 'This Month'];

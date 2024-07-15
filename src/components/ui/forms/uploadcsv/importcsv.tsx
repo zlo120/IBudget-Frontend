@@ -18,7 +18,7 @@ const ImportCSV = () => {
                     handleChange={handleChange} 
                     name="file" 
                     types={["CSV"]} 
-                    label="Upload your file by either clicking here or dragging your file into here. Supported file types:"
+                    label="Upload your file by either clicking here or dragging your file into here. Supported file types: "
                 />
             </div>
         </div>

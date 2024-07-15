@@ -26,6 +26,7 @@ const styles = makeStyles()(() => ({
     // Page 2
     tagDataContainer : {
         display: "flex",
+        marginTop: "20px",
     },
     tagDataObjectContainer : {
         width: "40%",
