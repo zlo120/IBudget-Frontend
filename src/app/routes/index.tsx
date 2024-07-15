@@ -1,6 +1,8 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createBrowserRouter } from 'react-router-dom';
-import AppRoot from './app/root';
+import AppRoot from './app/roots/root';
+import { ThisWeek } from './app/thisweek';
+import FinancialRoot from './app/roots/financialroot';
 
 const createRouter = (queryClient: QueryClient) => 
     createBrowserRouter([
@@ -32,10 +34,10 @@ const createRouter = (queryClient: QueryClient) =>
                     },
                 },
                 {
-                    path: 'monthlysummary',
+                    path: 'thismonth',
                     lazy: async () => {
-                        const { MonthlySummary } = await import('./app/monthlysummary');
-                        return { Component: MonthlySummary };
+                        const { ThisMonth } = await import('./app/thismonth');
+                        return { Component: ThisMonth };
                     },
                 },
                 {
@@ -52,6 +54,28 @@ const createRouter = (queryClient: QueryClient) =>
                         return { Component: UploadCSV };
                     },
                 },
+                {
+                    path: "financial",
+                    element: (
+                        <FinancialRoot />
+                    ),
+                    children: [
+                        {
+                            path: "income",
+                            lazy: async () => {
+                                const { AddIncome } = await import('./app/addincome');
+                                return { Component: AddIncome };
+                            }
+                        },
+                        {
+                            path: "expense",
+                            lazy: async () => {
+                                const { AddExpense } = await import('./app/addexpense');
+                                return { Component: AddExpense };
+                            }
+                        }
+                    ]
+                }
             ]
         }
     ]);

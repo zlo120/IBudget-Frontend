@@ -104,7 +104,7 @@ export const Search = () => {
                 </CardContent>
             </Card>
 
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{mt: 3}}>
                 <Table aria-label="search-table">
                     <TableHead>
                         <TableRow>

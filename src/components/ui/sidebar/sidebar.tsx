@@ -19,13 +19,11 @@ const getIcon = (index: number) => {
         case 1:
             return (<Search />);
         case 2:
-            return (<FormatAlignLeft />);
+            return (<UploadFile />);
         case 3:
             return (<CalendarToday />);
         case 4:
             return (<Event />);
-        case 5:
-            return (<UploadFile />);
         default:
             return (<FmdBad />);
     }
@@ -37,18 +35,16 @@ const getHref = (index: number) => {
         case 1:
             return "/app/search";
         case 2:
-            return "/app/mybudget";
+            return "/app/uploadcsv";
         case 3:
-            return "/app/monthlysummary";
+            return "/app/thismonth";
         case 4:
             return "/app/thisweek";
-        case 5:
-            return "/app/uploadcsv";
         default:
             return "/app/dashboard";
     }
 }
-const sideBarItems = ['Dashboard', 'Search', 'My Budget', 'Monthly Summary', 'This Week', 'Upload CSV'];
+const sideBarItems = ['Dashboard', 'Search', 'Upload CSV', 'This Month', 'This Week'];
 const drawer = (
     <Box sx={{overflow: "auto"}}>
         <List>
