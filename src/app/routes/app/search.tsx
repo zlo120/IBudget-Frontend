@@ -20,6 +20,10 @@ interface RowData {
 export const Search = () => {        
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [dataDisplayed, setDataDisplayed] = useState("Expense");
+    const [isThisWeekOnly, setIsThisWeekOnly] = useState(false);
+    const handleThisWeekOnlyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setIsThisWeekOnly(event.target.checked);
+    }
     const handleDataTypeChange = (event: SelectChangeEvent) => {
         setDataDisplayed(event.target.value as string);
     }
@@ -42,7 +46,13 @@ export const Search = () => {
         queryKey: ['searchData'],
         queryFn: () => fetch('https://localhost:7163/api/Financial/ReadWeek?date=04%2F02%2F2024')
             .then(res => res.json()),
-    }); 
+    });
+    const [day, month, year] = new Date().toLocaleDateString('en-GB').split('/');
+    const thisWeeksOnlySearchQuery = useQuery({
+        queryKey: ['thisWeeksSearchData'],
+        queryFn: () => fetch(`https://localhost:7163/api/Financial/ReadWeek?date=${month+'%2F'+day+'%2F'+year}`)
+            .then(res => res.json()),
+    });
     const tagQuery = useQuery({
         queryKey: ['tags'],
         queryFn: () => fetch('https://localhost:7163/api/UserDictionary/GetAllTags')
@@ -70,10 +80,11 @@ export const Search = () => {
                     return a.id - b.id;
             }
         })
-    }    
+    }
 
-    if (searchQuery.isPending) return <><Typography variant="h4">Loading...</Typography></>
+    if (searchQuery.isPending || thisWeeksOnlySearchQuery.isPending) return <><Typography variant="h4">Loading...</Typography></>
     if (searchQuery.error) return <><Typography variant="h4">An error has occured: {searchQuery.error.message}</Typography></>
+    if (thisWeeksOnlySearchQuery.error) return <><Typography variant="h4">An error has occured: {thisWeeksOnlySearchQuery.error.message}</Typography></>
 
     return (
         <>
@@ -126,7 +137,7 @@ export const Search = () => {
                             </Select>
                         </FormControl>
                         <FormControl fullWidth>
-                            <FormControlLabel control={<Switch />} label="This Week Only" />
+                            <FormControlLabel control={<Switch onChange={handleThisWeekOnlyChange}/>} label="This Week Only" />
                         </FormControl>
                     </div>
                 </CardContent>
@@ -142,7 +153,32 @@ export const Search = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {searchQuery.data.allExpenses
+                            { isThisWeekOnly ? thisWeeksOnlySearchQuery.data.allExpenses
+                                .map((row: RowData) => {
+                                    if (selectedTags.length === 0) return row
+                                    for (let i = 0; i < selectedTags.length; i++) {
+                                        if (row.tags.includes(selectedTags[i])) {
+                                            return row;
+                                        }
+                                    }
+                                })
+                                .filter((row: RowData) => row !== undefined)
+                                .slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage)
+                                .map((row: RowData) => 
+                                    <TableRow
+                                        key={row.id}
+                                        sx={{'&:last-child td, &:last-child th': { border: 0 }}}
+                                    >
+                                        <TableCell>{row.id}</TableCell>
+                                        <TableCell>${row.amount}</TableCell>
+                                        <TableCell>{row.tags.map((tag) => (
+                                                <Chip label={tag} style={{marginRight: "5px"}}/>
+                                            ))}
+                                        </TableCell>
+                                        <TableCell>{row.date}</TableCell>
+                                    </TableRow>
+                                )
+                                : searchQuery.data.allExpenses
                                 .map((row: RowData) => {
                                     if (selectedTags.length === 0) return row
                                     for (let i = 0; i < selectedTags.length; i++) {
@@ -174,7 +210,7 @@ export const Search = () => {
             <TablePagination
                 rowsPerPageOptions={[15, 25, 50]}
                 component="div"
-                count={searchQuery.data.allExpenses.length}
+                count={isThisWeekOnly ? thisWeeksOnlySearchQuery.data.allExpenses.length : searchQuery.data.allExpenses.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
