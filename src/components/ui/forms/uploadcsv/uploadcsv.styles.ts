@@ -31,14 +31,15 @@ const styles = makeStyles()(() => ({
     tagDataObjectContainer : {
         width: "40%",
         // backgroundColor: theme.palette.primary.dark,
-        margin: "0 50px 0 50px",
+        margin: "10px 50px 0 50px",
     },
     createRuleContainer : {
         display: "flex",
         width: "100%",
         alignContent: "center",
         alignItems: "center",
-    },    
+        marginBottom: "5px"
+    },
     icon: {
         color: theme.palette.grey[600],
         maxWidth: "20px",

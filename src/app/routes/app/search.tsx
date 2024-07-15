@@ -1,4 +1,4 @@
-import { Card, CardContent, FormControl, FormControlLabel, InputLabel, MenuItem, Select, SelectChangeEvent, Switch, TextField, Typography } from "@mui/material";
+import { Autocomplete, Card, CardContent, Chip, FormControl, FormControlLabel, InputLabel, MenuItem, Select, SelectChangeEvent, Switch, TablePagination, TextField, Typography } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -6,72 +6,97 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-export const Search = () => {    
+interface RowData {
+    id: number,
+    amount: number,
+    type: string,
+    tags: string[],
+    date: string
+}
+
+export const Search = () => {        
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [dataDisplayed, setDataDisplayed] = useState("Expense");
     const handleDataTypeChange = (event: SelectChangeEvent) => {
         setDataDisplayed(event.target.value as string);
     }
     const convertDateFormat = (dateString: string): string => {
-        const dateParts = dateString.split("/");
-        if (dateParts.length !== 3) {
-            throw new Error("Invalid date format. Expected dd/MM/yyyy");
-        }
-        const [day, month, year] = dateParts;
-        return `${year}/${month}/${day}`;
-    };    
-    const dummyDataInit = [
-        {ID: 4, Amount: 2000, Tags: "tech", Type: "Expense", Date: "02/05/2024"},
-        {ID: 3, Amount: 25, Tags: "food", Type: "Expense", Date: "01/05/2024"},
-        {ID: 2, Amount: 1200, Tags: "rent", Type: "Expense", Date: "22/04/2024"},
-        {ID: 1, Amount: 20, Tags: "animal food", Type: "Expense", Date: "20/03/2024"}
-    ]
-    const [dummyData, setDummyData] = useState(dummyDataInit);
-    const sortByCategories = ["Amount (Ascending)", "Amount (Descending)", "Date (Ascending)", "Date (Descending)", "Tags (Ascending)", "Tags (Descending)"];
-    const [sortByToDisplay, setSortByToDisplay] = useState("Date (Descending)");
+        return dateString.replaceAll("-", "/");
+    };
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(15);
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage);
+    }
+    const sortByCategories = ["Amount (Ascending)", "Amount (Descending)", "Date (Ascending)", "Date (Descending)"];
+    const [sortByToDisplay, setSortByToDisplay] = useState("Date (Descending)");  
+
+    const searchQuery = useQuery({
+        queryKey: ['searchData'],
+        queryFn: () => fetch('https://localhost:7163/api/Financial/ReadWeek?date=04%2F02%2F2024')
+            .then(res => res.json()),
+    }); 
+    const tagQuery = useQuery({
+        queryKey: ['tags'],
+        queryFn: () => fetch('https://localhost:7163/api/UserDictionary/GetAllTags')
+            .then(res => res.json()),
+    });
     const handleFilterChange = (event: SelectChangeEvent) => {
         setSortByToDisplay(event.target.value as string);
-        setDummyData(
-            dummyDataInit.sort((a, b) => {
-                switch (event.target.value as string) {
-                    case "Amount (Ascending)":
-                        return a.Amount - b.Amount;
-                    case "Amount (Descending)":
-                        return b.Amount - a.Amount;
-                    case "Date (Ascending)":
-                        const dateA: Date = new Date(convertDateFormat(a.Date));
-                        const dateB: Date = new Date(convertDateFormat(b.Date));
-                        if (dateA < dateB) return -1;
-                        return 1;                    
-                    case "Date (Descending)":
-                        const firstDate: Date = new Date(convertDateFormat(a.Date));
-                        const secondDate: Date = new Date(convertDateFormat(b.Date));
-                        if (firstDate >= secondDate) return -1;
-                        return 1;                                                          
-                    case "Tags (Ascending)":
-                        const tagA = a.Tags.toUpperCase();
-                        const tagB = b.Tags.toUpperCase();
-                        if (tagA < tagB) return -1;
-                        return 1;             
-                    case "Tags (Descending)":
-                        const firstTag = a.Tags.toUpperCase();
-                        const secondTag = b.Tags.toUpperCase();
-                        if (firstTag >= secondTag) return -1;
-                        return 1;
-                    default:
-                        return a.ID - b.ID;
-                }
-            })
-        )
-    }
+        searchQuery.data.allExpenses.sort((a: RowData, b: RowData) => {
+            switch (event.target.value as string) {
+                case "Amount (Ascending)":
+                    return a.amount - b.amount;
+                case "Amount (Descending)":
+                    return b.amount - a.amount;
+                case "Date (Ascending)":
+                    const dateA: Date = new Date(convertDateFormat(a.date));
+                    const dateB: Date = new Date(convertDateFormat(b.date));
+                    if (dateA < dateB) return -1;
+                    return 1;                    
+                case "Date (Descending)":
+                    const firstDate: Date = new Date(convertDateFormat(a.date));
+                    const secondDate: Date = new Date(convertDateFormat(b.date));
+                    if (firstDate >= secondDate) return -1;
+                    return 1;
+                default:
+                    return a.id - b.id;
+            }
+        })
+    }    
+
+    if (searchQuery.isPending) return <><Typography variant="h4">Loading...</Typography></>
+    if (searchQuery.error) return <><Typography variant="h4">An error has occured: {searchQuery.error.message}</Typography></>
 
     return (
         <>
             <Typography variant="h4">Search</Typography>            
             <Card>
-                <CardContent style={{display: "flex"}}>                     
-                    <TextField sx={{mr : 5}} style={{width: "100%"}} id="search_input" label="Tag" variant="standard" placeholder="search by tag"/>                    
+                <CardContent style={{display: "flex"}}>
+                    <Autocomplete
+                        multiple
+                        sx={{mr : 5}} 
+                        style={{width: "100%"}} 
+                        id="search_input" 
+                        options={tagQuery.data}
+                        filterSelectedOptions
+                        onChange={(event, value) => setSelectedTags(value as string[])}
+                        renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            variant="standard"
+                            label="Search by tag"
+                            placeholder="Tag name"
+                        />
+                        )}
+                    />
                     <div style={{width: "60%", display: "flex", alignContent: "center", alignItems: "center"}}>
                         <FormControl fullWidth sx={{mr: 2}}>
                             <InputLabel id="data-type-label">Data Type</InputLabel>
@@ -106,34 +131,55 @@ export const Search = () => {
                     </div>
                 </CardContent>
             </Card>
-
-            <TableContainer component={Paper} sx={{mt: 3}}>
-                <Table aria-label="search-table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Amount</TableCell>
-                            <TableCell>Tags</TableCell>
-                            <TableCell>Type</TableCell>
-                            <TableCell>Date</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {dummyData.map((row) => (
-                            <TableRow
-                                key={row.ID}
-                                sx={{'&:last-child td, &:last-child th': { border: 0 }}}
-                            >
-                                <TableCell>{row.ID}</TableCell>
-                                <TableCell>${row.Amount}</TableCell>
-                                <TableCell>{row.Tags}</TableCell>
-                                <TableCell>{row.Type}</TableCell>
-                                <TableCell>{row.Date}</TableCell>
+            <TableContainer component={Paper} sx={{mt: 3, maxHeight: "60vh", overflow: "scroll", }}>
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>ID</TableCell>
+                                <TableCell>Amount</TableCell>
+                                <TableCell>Tags</TableCell>
+                                <TableCell>Date</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {searchQuery.data.allExpenses
+                                .map((row: RowData) => {
+                                    if (selectedTags.length === 0) return row
+                                    for (let i = 0; i < selectedTags.length; i++) {
+                                        if (row.tags.includes(selectedTags[i])) {
+                                            return row;
+                                        }
+                                    }
+                                })
+                                .filter((row: RowData) => row !== undefined)
+                                .slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage)
+                                .map((row: RowData) => 
+                                    <TableRow
+                                        key={row.id}
+                                        sx={{'&:last-child td, &:last-child th': { border: 0 }}}
+                                    >
+                                        <TableCell>{row.id}</TableCell>
+                                        <TableCell>${row.amount}</TableCell>
+                                        <TableCell>{row.tags.map((tag) => (
+                                                <Chip label={tag} style={{marginRight: "5px"}}/>
+                                            ))}
+                                        </TableCell>
+                                        <TableCell>{row.date}</TableCell>
+                                    </TableRow>
+                                )
+                            }
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            <TablePagination
+                rowsPerPageOptions={[15, 25, 50]}
+                component="div"
+                count={searchQuery.data.allExpenses.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+            />
         </>
     )
 }

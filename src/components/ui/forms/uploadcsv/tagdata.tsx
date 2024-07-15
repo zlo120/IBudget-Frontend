@@ -13,11 +13,22 @@ import Divider from '@mui/material/Divider';
 const useStyles = styles;
 const TagData = () => { 
     const { classes } = useStyles();
-    const [isCreateRule, setIsCreateRule] = useState(false);
     const dummyData = ["K-Fresh", "Kmart", "Big W", "Coles Express", "Stock Exchange Hotel"];
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [capturedIndices, setCapturedIndices] = useState<number[]>([]);
+    const [isCreateRule, setIsCreateRule] = useState(false);
+
     const handleListItemClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
-        setSelectedIndex(index);
+        if (!isCreateRule) return setSelectedIndex(index);
+        let newArray: number[] = capturedIndices;
+        newArray.push(index);
+        setCapturedIndices(newArray);
+    }
+    const isIndexCaptured = (index: number) => {
+        for(let i = 0; i < capturedIndices.length; i++) {
+            if (index === capturedIndices[i]) return true;
+        }
+        return false;
     }
     return (
         <>
@@ -29,8 +40,10 @@ const TagData = () => {
                             if (index === dummyData.length - 1) {
                                 return (<ListItem disablePadding>
                                     <ListItemButton 
-                                        selected={selectedIndex === index}
-                                        onClick={(event) => handleListItemClick(event, index)}>
+                                        selected={ (selectedIndex === index && !isCreateRule) 
+                                            || (isCreateRule && isIndexCaptured(index))}
+                                        onClick={(event) => handleListItemClick(event, index)}
+                                        disabled={isCreateRule === true}>
                                         <ListItemText primary={text}/>
                                     </ListItemButton>
                                 </ListItem>)
@@ -39,8 +52,10 @@ const TagData = () => {
                                 return (<>
                                     <ListItem disablePadding>
                                         <ListItemButton 
-                                            selected={selectedIndex === index}
-                                            onClick={(event) => handleListItemClick(event, index)}>
+                                            selected={ (selectedIndex === index && !isCreateRule) 
+                                                || (isCreateRule && isIndexCaptured(index))}
+                                            onClick={(event) => handleListItemClick(event, index)}
+                                            disabled={isCreateRule === true}>
                                             <ListItemText primary={text}/>
                                         </ListItemButton>
                                     </ListItem>
@@ -49,12 +64,16 @@ const TagData = () => {
                             }
                         })}
                     </List>
-                </div>  
+                </div>
                 <div className={`${classes.tagDataObjectContainer}`}>
                     <div className={`${classes.createRuleContainer}`}>
                         <Typography>Create Rule</Typography>
                         <HelpIcon className={`${classes.icon}`}/>                        
-                        <Switch checked={isCreateRule} onChange={() => setIsCreateRule(!isCreateRule)} inputProps={{ 'aria-label': 'create rule switch' }}/>
+                        <Switch 
+                            checked={isCreateRule} 
+                            onChange={() => setIsCreateRule(!isCreateRule)} 
+                            inputProps={{ 'aria-label': 'create rule switch' }}
+                        />
                     </div>
                 {
                     isCreateRule ? (
