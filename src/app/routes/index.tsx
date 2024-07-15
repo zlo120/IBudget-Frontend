@@ -1,7 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createBrowserRouter } from 'react-router-dom';
 import AppRoot from './app/roots/root';
-import { ThisWeek } from './app/thisweek';
 import FinancialRoot from './app/roots/financialroot';
 
 const createRouter = (queryClient: QueryClient) => 
@@ -12,13 +11,6 @@ const createRouter = (queryClient: QueryClient) =>
                 <AppRoot />
             ),
             children: [
-                {
-                    path: 'dashboard',
-                    lazy: async () => {
-                        const { Dashboard } = await import('./app/dashboard');
-                        return { Component: Dashboard };
-                    },
-                },
                 {
                     path: 'search',
                     lazy: async () => {
@@ -38,13 +30,6 @@ const createRouter = (queryClient: QueryClient) =>
                     lazy: async () => {
                         const { ThisMonth } = await import('./app/thismonth');
                         return { Component: ThisMonth };
-                    },
-                },
-                {
-                    path: 'thisweek',
-                    lazy: async () => {
-                        const { ThisWeek } = await import('./app/thisweek');
-                        return { Component: ThisWeek };
                     },
                 },
                 {

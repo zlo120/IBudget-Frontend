@@ -1,4 +1,4 @@
-import { Card, CardContent, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material";
+import { Card, CardContent, FormControl, FormControlLabel, InputLabel, MenuItem, Select, SelectChangeEvent, Switch, TextField, Typography } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -72,7 +72,7 @@ export const Search = () => {
             <Card>
                 <CardContent style={{display: "flex"}}>                     
                     <TextField sx={{mr : 5}} style={{width: "100%"}} id="search_input" label="Tag" variant="standard" placeholder="search by tag"/>                    
-                    <div style={{width: "50%", display: "flex"}}>
+                    <div style={{width: "60%", display: "flex", alignContent: "center", alignItems: "center"}}>
                         <FormControl fullWidth sx={{mr: 2}}>
                             <InputLabel id="data-type-label">Data Type</InputLabel>
                             <Select
@@ -86,7 +86,7 @@ export const Search = () => {
                                 <MenuItem value={"Expense"}>Expense</MenuItem>
                             </Select>
                         </FormControl>
-                        <FormControl fullWidth>
+                        <FormControl fullWidth sx={{mr: 2}}>
                             <InputLabel id="filter-by-label">Filter</InputLabel>
                             <Select
                                 labelId="filter-by-label"
@@ -99,6 +99,9 @@ export const Search = () => {
                                     <MenuItem value={text}>{text}</MenuItem>
                                 ))}
                             </Select>
+                        </FormControl>
+                        <FormControl fullWidth>
+                            <FormControlLabel control={<Switch />} label="This Week Only" />
                         </FormControl>
                     </div>
                 </CardContent>

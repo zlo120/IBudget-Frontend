@@ -15,15 +15,11 @@ const drawerWidth = 240;
 const getIcon = (index: number) => {
     switch(index) {
         case 0:
-            return (<SpaceDashboardOutlined />);
-        case 1:
             return (<Search />);
-        case 2:
+        case 1:
             return (<UploadFile />);
-        case 3:
+        case 2:
             return (<CalendarToday />);
-        case 4:
-            return (<Event />);
         default:
             return (<FmdBad />);
     }
@@ -31,20 +27,16 @@ const getIcon = (index: number) => {
 const getHref = (index: number) => {
     switch(index) {
         case 0:
-            return "/app/dashboard";
-        case 1:
             return "/app/search";
-        case 2:
+        case 1:
             return "/app/uploadcsv";
-        case 3:
+        case 2:
             return "/app/thismonth";
-        case 4:
-            return "/app/thisweek";
         default:
-            return "/app/dashboard";
+            return "/app/search";
     }
 }
-const sideBarItems = ['Dashboard', 'Search', 'Upload CSV', 'This Month', 'This Week'];
+const sideBarItems = ['Search', 'Upload CSV', 'This Month'];
 const drawer = (
     <Box sx={{overflow: "auto"}}>
         <List>
