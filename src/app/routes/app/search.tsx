@@ -6,7 +6,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 interface RowData {
@@ -178,6 +178,7 @@ export const Search = () => {
                                         <TableCell>{row.date}</TableCell>
                                     </TableRow>
                                 )
+                                // else
                                 : searchQuery.data.allExpenses
                                 .map((row: RowData) => {
                                     if (selectedTags.length === 0) return row

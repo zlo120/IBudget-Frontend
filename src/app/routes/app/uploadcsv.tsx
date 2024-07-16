@@ -3,6 +3,17 @@ import { useState } from "react";
 import ImportCSV from "../../../components/ui/forms/uploadcsv/importcsv";
 import TagData from "../../../components/ui/forms/uploadcsv/tagdata";
 import ReviewData from "../../../components/ui/forms/uploadcsv/review";
+import { atom } from "jotai";
+
+type CsvData = {
+    date: string, 
+    amount: number,
+    description: string,
+    tags: string[]
+}
+
+export const taggedCsvDataAtom = atom<CsvData[]>([]);
+export const untaggedCsvDataAtom = atom<CsvData[]>([]);
 
 export const UploadCSV = () => {
     const [page, setPage] = useState(0);
@@ -43,7 +54,7 @@ export const UploadCSV = () => {
             {
                 page === 0 ? (
                     <ImportCSV />
-                ) 
+                )
                 : page === 1 ? (
                     <TagData />
                 )
