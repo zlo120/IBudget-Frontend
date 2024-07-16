@@ -9,12 +9,28 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
+import { untaggedCsvDataAtom } from "../../../../app/routes/app/uploadcsv";
+import { atom, useAtom } from "jotai";
+import { useQuery } from "@tanstack/react-query";
 
 const useStyles = styles;
-const TagData = () => { 
+export const tagsAtom = atom<string[]>([]);
+export const distinctUntaggedCsvDataAtom = atom<string[]>([]);
 
+const TagData = () => {     
+    const [untaggedCsvData, setUntaggedCsvData] = useAtom(untaggedCsvDataAtom);
+    // const [distinctUntaggedCsvData, setDistinctUntaggedCsvData] = useAtom(distinctUntaggedCsvDataAtom);
+    // setDistinctUntaggedCsvData(Array.from(new Set(untaggedCsvData.map(item => item.description))));
+    const [distinctUntaggedCsvData, setDistinctUntaggedCsvData] = useState<string[]>(Array.from(new Set(untaggedCsvData.map(item => item.description))));
+    const [tags, setTags] = useAtom(tagsAtom);
+    const tagQuery = useQuery({
+        queryKey: ['tags'],
+        queryFn: () => fetch('https://localhost:7163/api/UserDictionary/GetAllTags')
+            .then(res => res.json())
+            .then(data => setTags(data)),
+    });
+    
     const { classes } = useStyles();
-    const dummyData = ["K-Fresh", "Kmart", "Big W", "Coles Express", "Stock Exchange Hotel"];
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [capturedIndices, setCapturedIndices] = useState<number[]>([]);
     const [isCreateRule, setIsCreateRule] = useState(false);
@@ -36,16 +52,16 @@ const TagData = () => {
             <div className={`${classes.tagDataContainer}`}>            
                 <div className={`${classes.tagDataObjectContainer}`}>
                     <Typography variant="h5">Untagged Entries</Typography>   
-                    <List>
-                        {dummyData.map((text, index) => {
-                            if (index === dummyData.length - 1) {
+                    <List sx={{maxHeight: "60vh", overflow: "scroll"}}>
+                        {distinctUntaggedCsvData.map((obj, index) => {
+                            if (index === distinctUntaggedCsvData.length - 1) {
                                 return (<ListItem disablePadding>
                                     <ListItemButton 
                                         selected={ (selectedIndex === index && !isCreateRule) 
                                             || (isCreateRule && isIndexCaptured(index))}
                                         onClick={(event) => handleListItemClick(event, index)}
                                         disabled={isCreateRule === true}>
-                                        <ListItemText primary={text}/>
+                                        <ListItemText primary={obj}/>
                                     </ListItemButton>
                                 </ListItem>)
                             }
@@ -57,7 +73,7 @@ const TagData = () => {
                                                 || (isCreateRule && isIndexCaptured(index))}
                                             onClick={(event) => handleListItemClick(event, index)}
                                             disabled={isCreateRule === true}>
-                                            <ListItemText primary={text}/>
+                                            <ListItemText primary={obj}/>
                                         </ListItemButton>
                                     </ListItem>
                                     <Divider />
@@ -79,7 +95,7 @@ const TagData = () => {
                 {
                     isCreateRule ? (
                         <CreateRule />
-                    ) : <TagEntry entryName={dummyData[selectedIndex]}/>
+                    ) : <TagEntry entryName={distinctUntaggedCsvData[selectedIndex]}/>
                 }
                 </div>
             </div>

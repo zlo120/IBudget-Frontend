@@ -1,20 +1,15 @@
 import { Autocomplete, TextField, Typography } from "@mui/material";
 import styles from "../uploadcsv.styles";
 import Submit from "../submit";
+import { useAtom } from "jotai";
+import { untaggedCsvDataAtom } from "../../../../../app/routes/app/uploadcsv";
+import { tagsAtom } from "../tagdata";
 
 const useStyles = styles;
 const CreateRule = () => {
     const { classes } = useStyles();
-    const tagDummyData = [
-        { title: "Groceries" },
-        { title: "Other" },
-        { title: "Entertainment" },
-        { title: "Health" },
-        { title: "Food" },
-        { title: "Petrol" },
-        { title: "Essentials" }
-    ]
-
+    const [untaggedCsvData, setUntaggedCsvData] = useAtom(untaggedCsvDataAtom);
+    const [tags, setTags] = useAtom(tagsAtom);
     return (
         <>
             <Typography variant="h5">Create Rule</Typography>
@@ -22,8 +17,8 @@ const CreateRule = () => {
             <Autocomplete
                 multiple
                 id="tags-standard"
-                options={tagDummyData}
-                getOptionLabel={(option) => option.title}
+                options={tags}
+                getOptionLabel={(option) => option}
                 filterSelectedOptions
                 renderInput={(params) => (
                 <TextField
@@ -33,7 +28,7 @@ const CreateRule = () => {
                 />
                 )}
             />
-            <Submit text={`You have ${tagDummyData.length} entries left.`} buttonText="Create Rule"/>
+            <Submit text={`You have ${untaggedCsvData.length} entries left.`} buttonText="Create Rule"/>
         </>
     );
 }

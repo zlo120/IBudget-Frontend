@@ -1,13 +1,17 @@
 import { Button, CircularProgress, Typography } from "@mui/material";
-import styles from "./uploadcsv.styles";
-import React, { ChangeEventHandler, useState } from "react";
-import { FileUploader } from "react-drag-drop-files";
+import { useState } from "react";
 import { useAtom } from "jotai";
-import { taggedCsvDataAtom, untaggedCsvDataAtom } from "../../../../app/routes/app/uploadcsv";
-import { useQuery } from "@tanstack/react-query";
-import Papa from 'papaparse';
+import { CsvData, stepAtom, allCsvDataAtom, untaggedCsvDataAtom } from "../../../../app/routes/app/uploadcsv";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CloudUpload } from "@mui/icons-material";
 import { styled } from '@mui/material/styles';
+import styles from "./uploadcsv.styles";
+import Papa from 'papaparse';
+
+interface SortResponse {
+    taggedRecords: any;
+    untaggedRecords: any;
+}
 
 const useStyles = styles;
 const ImportCSV = () => { 
@@ -21,50 +25,69 @@ const ImportCSV = () => {
         left: 0,
         whiteSpace: 'nowrap',
         width: 1,
-      });
+    });
 
-    const [taggedCsvData, setTaggedCsvData] = useAtom(taggedCsvDataAtom);
+    const [allCsvData, setAllCsvData] = useAtom(allCsvDataAtom);
     const [untaggedCsvData, setUntaggedCsvData] = useAtom(untaggedCsvDataAtom);
+    const [step, setStep] = useAtom(stepAtom);
     
     const { classes } = useStyles();
     const [file, setFile] = useState<File | null>(null);
-    const handleChange = (event: any) => {
+
+    const handleFileUpload = (event: any) => {
         setFile(event.target.files![0]);
     };
 
-    const handleProcessCsv = () => {
-        console.log("processing csv, please wait...")
+    const handleSubmit = async () => {
+        parseCsvData();
+    }
+
+    const parseCsvData = () => {
         Papa.parse(file!, {
             header: true,
             complete: (result) => {
-                console.log(result.data);
+                console.log("completed parsing...");
+                setAllCsvData(result.data as CsvData[]);
+                csvMutation.mutate(result.data);
             }
         });
-        // postCsvData.refetch();
     }
 
-    const postCsvData = useQuery({
-        queryKey: ['sendCsvData'],
-        refetchOnWindowFocus: false,
-        enabled: false,
-        queryFn: () => fetch('https://localhost:7163/api/CSVParser/OrganiseCSV')
-            .then(res => res.json()),
+    const sendCsvData = async (csvData: any): Promise<Response> => {
+        return fetch('https://localhost:7163/api/CSVParser/OrganiseCSV', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(csvData)
+        });
+    }
+    const client = useQueryClient();
+    const csvMutation = useMutation({
+        mutationFn: sendCsvData,
+        onSuccess: (res) => res.json().then(res => client.setQueryData(['csvData', 1], res)),
     });
+
+    if (csvMutation.isError) return <Typography variant="body2">An error occurred: {csvMutation.error.message}</Typography>
+
+    if (csvMutation.isSuccess) {
+        const responseData: SortResponse | undefined = client.getQueryData(['csvData', 1]);
+        setUntaggedCsvData(responseData!.untaggedRecords as CsvData[]);
+        setStep(1);
+    }
 
     return (
         <div className={`${classes.uploadWidgetContainer}`}>
             <div className={`${classes.uploadWidget}`}>
                 {
-                    postCsvData.isLoading ? (
+                    csvMutation.isPending ? (
                         <CircularProgress />
-                    ) : (
+                    ) 
+                    : csvMutation.isSuccess ? (
+                        <Typography variant="body2">CSV data processed successfully...</Typography>
+                    )
+                    : (
                         <>
-                            {/* <FileUploader 
-                                handleChange={handleChange} 
-                                name="file" 
-                                types={["CSV"]} 
-                                label="Upload your file by either clicking here or dragging your file into here. Supported file types: "
-                            /> */}
                             <Button
                                 component="label"
                                 color="success"
@@ -74,14 +97,14 @@ const ImportCSV = () => {
                                 startIcon={<CloudUpload />}
                                 >
                                 Upload file
-                                <VisuallyHiddenInput type="file" accept=".csv" onChange={handleChange}/>
+                                <VisuallyHiddenInput type="file" accept=".csv" onChange={handleFileUpload}/>
                             </Button>
                             {
                                 file !== null ? (
                                     <Typography sx={{marginTop: "5px"}} variant="body2">{file.name} uploaded successfully...</Typography>
                                 ) : null
                             }
-                            <Button variant="contained" color="primary" style={{marginTop:"20px"}} onClick={handleProcessCsv} disabled={file === null}>Process Csv</Button>                     
+                            <Button variant="contained" color="primary" style={{marginTop:"20px"}} onClick={handleSubmit} disabled={file === null}>Process Csv</Button>                     
                         </>
                     )}    
             </div>
