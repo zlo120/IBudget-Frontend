@@ -9,31 +9,25 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import { untaggedCsvDataAtom } from "../../../../app/routes/app/uploadcsv";
+import { untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
 import { atom, useAtom } from "jotai";
-import { useQuery } from "@tanstack/react-query";
+import { useTagQuery } from "../../../../api/api";
 
 const useStyles = styles;
 export const tagsAtom = atom<string[]>([]);
 export const distinctUntaggedCsvDataAtom = atom<string[]>([]);
 
-const TagData = () => {     
-    const [untaggedCsvData, setUntaggedCsvData] = useAtom(untaggedCsvDataAtom);
-    // const [distinctUntaggedCsvData, setDistinctUntaggedCsvData] = useAtom(distinctUntaggedCsvDataAtom);
-    // setDistinctUntaggedCsvData(Array.from(new Set(untaggedCsvData.map(item => item.description))));
-    const [distinctUntaggedCsvData, setDistinctUntaggedCsvData] = useState<string[]>(Array.from(new Set(untaggedCsvData.map(item => item.description))));
-    const [tags, setTags] = useAtom(tagsAtom);
-    const tagQuery = useQuery({
-        queryKey: ['tags'],
-        queryFn: () => fetch('https://localhost:7163/api/UserDictionary/GetAllTags')
-            .then(res => res.json())
-            .then(data => setTags(data)),
-    });
-    
+const TagData = () => {    
     const { classes } = useStyles();
+
+    const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
+    const [tags, setTags] = useAtom(tagsAtom);
+
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [capturedIndices, setCapturedIndices] = useState<number[]>([]);
     const [isCreateRule, setIsCreateRule] = useState(false);
+
+    const tagQuery = useTagQuery();
 
     const handleListItemClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
         if (!isCreateRule) return setSelectedIndex(index);
@@ -47,14 +41,15 @@ const TagData = () => {
         }
         return false;
     }
+
     return (
         <>
             <div className={`${classes.tagDataContainer}`}>            
                 <div className={`${classes.tagDataObjectContainer}`}>
                     <Typography variant="h5">Untagged Entries</Typography>   
                     <List sx={{maxHeight: "60vh", overflow: "scroll"}}>
-                        {distinctUntaggedCsvData.map((obj, index) => {
-                            if (index === distinctUntaggedCsvData.length - 1) {
+                        {untaggedDescriptions.map((obj, index) => {
+                            if (index === untaggedDescriptions.length - 1) {
                                 return (<ListItem disablePadding>
                                     <ListItemButton 
                                         selected={ (selectedIndex === index && !isCreateRule) 
@@ -95,7 +90,7 @@ const TagData = () => {
                 {
                     isCreateRule ? (
                         <CreateRule />
-                    ) : <TagEntry entryName={distinctUntaggedCsvData[selectedIndex]}/>
+                    ) : <TagEntry entryName={untaggedDescriptions[selectedIndex]}/>
                 }
                 </div>
             </div>

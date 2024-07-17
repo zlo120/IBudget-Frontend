@@ -1,10 +1,8 @@
 import { Autocomplete, TextField, Typography } from "@mui/material";
 import styles from "../uploadcsv.styles";
-import { useState } from "react";
 import Submit from "../submit";
-import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { untaggedCsvDataAtom } from "../../../../../app/routes/app/uploadcsv";
+import { untaggedDescriptionsAtom } from "../../../../../app/routes/app/uploadcsv";
 import { tagsAtom } from "../tagdata";
 
 const useStyles = styles;
@@ -14,8 +12,10 @@ interface TagEntryProps {
 const TagEntry = (props: TagEntryProps) => {
     const { classes } = useStyles();
     const {entryName} = props;
-    const [untaggedCsvData, setUntaggedCsvData] = useAtom(untaggedCsvDataAtom);
+
+    const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
     const [tags, setTags] = useAtom(tagsAtom);
+    
     return (
         <>
             <Typography variant="h5">Tagging Entry</Typography>
@@ -34,7 +34,7 @@ const TagEntry = (props: TagEntryProps) => {
                 />
                 )}
             />
-            <Submit text={`You have ${untaggedCsvData.length} entries left.`} buttonText="Submit" />
+            <Submit text={`You have ${untaggedDescriptions.length} entries left.`} buttonText="Submit" />
         </>
     );
 }

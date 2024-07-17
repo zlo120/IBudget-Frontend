@@ -1,17 +1,12 @@
 import { Button, CircularProgress, Typography } from "@mui/material";
 import { useState } from "react";
 import { useAtom } from "jotai";
-import { CsvData, stepAtom, allCsvDataAtom, untaggedCsvDataAtom } from "../../../../app/routes/app/uploadcsv";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CsvData, stepAtom, allCsvDataAtom, untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
 import { CloudUpload } from "@mui/icons-material";
 import { styled } from '@mui/material/styles';
 import styles from "./uploadcsv.styles";
 import Papa from 'papaparse';
-
-interface SortResponse {
-    taggedRecords: any;
-    untaggedRecords: any;
-}
+import { useFindUntagged } from "../../../../api/api";
 
 const useStyles = styles;
 const ImportCSV = () => { 
@@ -26,22 +21,22 @@ const ImportCSV = () => {
         whiteSpace: 'nowrap',
         width: 1,
     });
+    const { classes } = useStyles();
 
     const [allCsvData, setAllCsvData] = useAtom(allCsvDataAtom);
-    const [untaggedCsvData, setUntaggedCsvData] = useAtom(untaggedCsvDataAtom);
+    const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
     const [step, setStep] = useAtom(stepAtom);
     
-    const { classes } = useStyles();
     const [file, setFile] = useState<File | null>(null);
+    
+    const [client, csvMutation] = useFindUntagged();
 
     const handleFileUpload = (event: any) => {
         setFile(event.target.files![0]);
     };
-
     const handleSubmit = async () => {
         parseCsvData();
     }
-
     const parseCsvData = () => {
         Papa.parse(file!, {
             header: true,
@@ -53,26 +48,10 @@ const ImportCSV = () => {
         });
     }
 
-    const sendCsvData = async (csvData: any): Promise<Response> => {
-        return fetch('https://localhost:7163/api/CSVParser/OrganiseCSV', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(csvData)
-        });
-    }
-    const client = useQueryClient();
-    const csvMutation = useMutation({
-        mutationFn: sendCsvData,
-        onSuccess: (res) => res.json().then(res => client.setQueryData(['csvData', 1], res)),
-    });
-
     if (csvMutation.isError) return <Typography variant="body2">An error occurred: {csvMutation.error.message}</Typography>
-
     if (csvMutation.isSuccess) {
-        const responseData: SortResponse | undefined = client.getQueryData(['csvData', 1]);
-        setUntaggedCsvData(responseData!.untaggedRecords as CsvData[]);
+        const responseData: any = client.getQueryData(['untaggedDescriptions', 1]);
+        setUntaggedDescriptions(responseData);
         setStep(1);
     }
 

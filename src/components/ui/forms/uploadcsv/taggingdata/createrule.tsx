@@ -2,14 +2,16 @@ import { Autocomplete, TextField, Typography } from "@mui/material";
 import styles from "../uploadcsv.styles";
 import Submit from "../submit";
 import { useAtom } from "jotai";
-import { untaggedCsvDataAtom } from "../../../../../app/routes/app/uploadcsv";
+import { untaggedDescriptionsAtom } from "../../../../../app/routes/app/uploadcsv";
 import { tagsAtom } from "../tagdata";
 
 const useStyles = styles;
 const CreateRule = () => {
     const { classes } = useStyles();
-    const [untaggedCsvData, setUntaggedCsvData] = useAtom(untaggedCsvDataAtom);
+    
+    const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
     const [tags, setTags] = useAtom(tagsAtom);
+
     return (
         <>
             <Typography variant="h5">Create Rule</Typography>
@@ -28,7 +30,7 @@ const CreateRule = () => {
                 />
                 )}
             />
-            <Submit text={`You have ${untaggedCsvData.length} entries left.`} buttonText="Create Rule"/>
+            <Submit text={`You have ${untaggedDescriptions.length} entries left.`} buttonText="Create Rule"/>
         </>
     );
 }

@@ -7,31 +7,29 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { RowData } from "../../../models/RowData";
+import { useSearchAllData, useSearchThisWeekData, useTagQuery } from "../../../api/api";
 
-interface RowData {
-    id: number,
-    amount: number,
-    type: string,
-    tags: string[],
-    date: string
-}
+export const Search = () => {     
+    const searchQuery = useSearchAllData();
+    const tagQuery = useTagQuery();    
+    const thisWeeksOnlySearchQuery = useSearchThisWeekData();
 
-export const Search = () => {        
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [dataDisplayed, setDataDisplayed] = useState("Expense");
     const [isThisWeekOnly, setIsThisWeekOnly] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(15);
+    const [sortByToDisplay, setSortByToDisplay] = useState("Date (Descending)");  
+    
+    const sortByCategories = ["Amount (Ascending)", "Amount (Descending)", "Date (Ascending)", "Date (Descending)"];
+
     const handleThisWeekOnlyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setIsThisWeekOnly(event.target.checked);
     }
     const handleDataTypeChange = (event: SelectChangeEvent) => {
         setDataDisplayed(event.target.value as string);
     }
-    const convertDateFormat = (dateString: string): string => {
-        return dateString.replaceAll("-", "/");
-    };
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(15);
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
@@ -39,25 +37,6 @@ export const Search = () => {
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
     }
-    const sortByCategories = ["Amount (Ascending)", "Amount (Descending)", "Date (Ascending)", "Date (Descending)"];
-    const [sortByToDisplay, setSortByToDisplay] = useState("Date (Descending)");  
-
-    const searchQuery = useQuery({
-        queryKey: ['searchData'],
-        queryFn: () => fetch('https://localhost:7163/api/Financial/ReadWeek?date=04%2F02%2F2024')
-            .then(res => res.json()),
-    });
-    const [day, month, year] = new Date().toLocaleDateString('en-GB').split('/');
-    const thisWeeksOnlySearchQuery = useQuery({
-        queryKey: ['thisWeeksSearchData'],
-        queryFn: () => fetch(`https://localhost:7163/api/Financial/ReadWeek?date=${month+'%2F'+day+'%2F'+year}`)
-            .then(res => res.json()),
-    });
-    const tagQuery = useQuery({
-        queryKey: ['tags'],
-        queryFn: () => fetch('https://localhost:7163/api/UserDictionary/GetAllTags')
-            .then(res => res.json()),
-    });
     const handleFilterChange = (event: SelectChangeEvent) => {
         setSortByToDisplay(event.target.value as string);
         searchQuery.data.allExpenses.sort((a: RowData, b: RowData) => {
@@ -81,10 +60,13 @@ export const Search = () => {
             }
         })
     }
+    const convertDateFormat = (dateString: string): string => {
+        return dateString.replaceAll("-", "/");
+    };
 
     if (searchQuery.isPending || thisWeeksOnlySearchQuery.isPending) return <><Typography variant="h4">Loading...</Typography></>
-    if (searchQuery.error) return <><Typography variant="h4">An error has occured: {searchQuery.error.message}</Typography></>
-    if (thisWeeksOnlySearchQuery.error) return <><Typography variant="h4">An error has occured: {thisWeeksOnlySearchQuery.error.message}</Typography></>
+    if (searchQuery.error) return <><Typography variant="h4">An error has occured when querying all the data: {searchQuery.error.message}</Typography></>
+    if (thisWeeksOnlySearchQuery.error) return <><Typography variant="h4">An error has occured when querying this week's data: {thisWeeksOnlySearchQuery.error.message}</Typography></>
 
     return (
         <>
@@ -123,7 +105,7 @@ export const Search = () => {
                             </Select>
                         </FormControl>
                         <FormControl fullWidth sx={{mr: 2}}>
-                            <InputLabel id="filter-by-label">Filter</InputLabel>
+                            <InputLabel id="filter-by-label">Sort</InputLabel>
                             <Select
                                 labelId="filter-by-label"
                                 id="filter-by"

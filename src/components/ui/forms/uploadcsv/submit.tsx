@@ -10,6 +10,7 @@ interface SubmitProps {
 const Submit = (props: SubmitProps) => {
     const { classes } = useStyles();
     const { text, buttonText } = props;
+    
     return (
         <div className={`${classes.submitContainer}`}>
             <Typography variant="subtitle1" style={{marginTop: "10px"}}>{text}</Typography>

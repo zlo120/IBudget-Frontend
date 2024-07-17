@@ -1,5 +1,4 @@
 import { Stepper, Step, StepLabel, Typography } from "@mui/material"
-import { useState } from "react";
 import ImportCSV from "../../../components/ui/forms/uploadcsv/importcsv";
 import TagData from "../../../components/ui/forms/uploadcsv/tagdata";
 import ReviewData from "../../../components/ui/forms/uploadcsv/review";
@@ -13,7 +12,7 @@ export type CsvData = {
 }
 
 export const allCsvDataAtom = atom<CsvData[]>([]);
-export const untaggedCsvDataAtom = atom<CsvData[]>([]);
+export const untaggedDescriptionsAtom = atom<string[]>([]);
 export const stepAtom = atom<number>(0);
 
 export const UploadCSV = () => {
