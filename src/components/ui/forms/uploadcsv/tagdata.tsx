@@ -27,8 +27,8 @@ const TagData = () => {
     const [capturedIndices, setCapturedIndices] = useState<number[]>([]);
     const [isCreateRule, setIsCreateRule] = useState(false);
 
-    const tagQuery = useTagQuery();
-
+    const [client, tagQuery] = useTagQuery();
+    
     const handleListItemClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
         if (!isCreateRule) return setSelectedIndex(index);
         let newArray: number[] = capturedIndices;
@@ -41,6 +41,9 @@ const TagData = () => {
         }
         return false;
     }
+    
+    if (tagQuery.isError) return <Typography variant="body2">An error occurred: {tagQuery.error.message}</Typography>
+    if (tagQuery.isSuccess) setTags(client.getQueryData(['allTags', 1]) as string[]);
 
     return (
         <>

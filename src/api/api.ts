@@ -1,12 +1,18 @@
-import { useQuery,useQueryClient, useMutation, UseMutationResult } from "@tanstack/react-query";
-export const useTagQuery = () => {
-    return useQuery({
-        queryKey: ['tags'],
+import { useQuery,useQueryClient, useMutation, UseMutationResult, UseQueryResult, QueryClient } from "@tanstack/react-query";
+export const useTagQuery = (): [client: QueryClient, tagQuery: UseQueryResult] => {
+    const client = useQueryClient();    
+    const tagQuery = useQuery({
+        queryKey: ['allTags'],
         queryFn: () => fetch('https://localhost:7163/api/UserDictionary/GetAllTags')
-            .then(res => res.json()),
+            .then(res => res.json())
+            .then((res) => { 
+                client.setQueryData(['allTags', 1], res);
+                return res;
+            }),
     });
+    return [ client, tagQuery ];
 }
-export const useFindUntagged = (): [client: any, csvMutation: UseMutationResult] => {
+export const useFindUntagged = (): [client: QueryClient, csvMutation: UseMutationResult] => {
     const client = useQueryClient();
     const csvMutation = useMutation({
         mutationFn: async (csvData: any): Promise<Response> => {

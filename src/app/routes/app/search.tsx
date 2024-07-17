@@ -12,7 +12,7 @@ import { useSearchAllData, useSearchThisWeekData, useTagQuery } from "../../../a
 
 export const Search = () => {     
     const searchQuery = useSearchAllData();
-    const tagQuery = useTagQuery();    
+    const [client, tagQuery] = useTagQuery();    
     const thisWeeksOnlySearchQuery = useSearchThisWeekData();
 
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -78,7 +78,7 @@ export const Search = () => {
                         sx={{mr : 5}} 
                         style={{width: "100%"}} 
                         id="search_input" 
-                        options={tagQuery.data}
+                        options={client.getQueryData(['allTags', 1]) as string[]}
                         filterSelectedOptions
                         onChange={(event, value) => setSelectedTags(value as string[])}
                         renderInput={(params) => (

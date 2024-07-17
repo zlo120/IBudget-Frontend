@@ -14,7 +14,7 @@ const Submit = (props: SubmitProps) => {
     return (
         <div className={`${classes.submitContainer}`}>
             <Typography variant="subtitle1" style={{marginTop: "10px"}}>{text}</Typography>
-            <Button variant="contained" className={`${classes.submit}`}>{buttonText}</Button>
+            <Button variant="contained" className={`${classes.submit}`} type="submit" onClick={() => alert("Submitted")}>{buttonText}</Button>
         </div>
     )
 }
