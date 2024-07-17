@@ -1,11 +1,13 @@
 import { Autocomplete, TextField, Typography } from "@mui/material";
 import styles from "../uploadcsv.styles";
 import Submit from "../submit";
-import { useAtom } from "jotai";
+import { atom, useAtom, useSetAtom } from "jotai";
 import { untaggedDescriptionsAtom } from "../../../../../app/routes/app/uploadcsv";
 import { tagsAtom } from "../tagdata";
+import { singleEntryTagsAtom } from "../importcsv";
 
 const useStyles = styles;
+export const entryNameAtom = atom<string>("");
 type TagEntryProps = {
     entryName : string
 }
@@ -15,7 +17,9 @@ const TagEntry = (props: TagEntryProps) => {
 
     const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
     const [tags, setTags] = useAtom(tagsAtom);
-    
+    const [singleEntryTags, setSingleEntryTags] = useAtom(singleEntryTagsAtom);
+    const setEntryName = useSetAtom(entryNameAtom);
+    setEntryName(entryName);
     return (
         <>
             <Typography variant="h5">Tagging Entry</Typography>
@@ -24,8 +28,10 @@ const TagEntry = (props: TagEntryProps) => {
                 multiple
                 id="tags-standard"
                 options={tags}
+                value={singleEntryTags}
                 getOptionLabel={(option) => option}
                 filterSelectedOptions
+                onChange={(event, value) => setSingleEntryTags(value)}
                 renderInput={(params) => (
                 <TextField
                     {...params}

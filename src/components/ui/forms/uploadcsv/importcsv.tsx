@@ -1,14 +1,19 @@
 import { Button, CircularProgress, Typography } from "@mui/material";
 import { useState } from "react";
-import { useAtom } from "jotai";
-import { CsvData, stepAtom, allCsvDataAtom, untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
+import { atom, useAtom, useSetAtom } from "jotai";
+import { stepAtom, allCsvDataAtom, untaggedDescriptionsAtom, distinctDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
 import { CloudUpload } from "@mui/icons-material";
 import { styled } from '@mui/material/styles';
 import styles from "./uploadcsv.styles";
 import Papa from 'papaparse';
 import { useFindUntagged } from "../../../../api/api";
+import { CsvData } from "../../../../models/CsvData";
 
 const useStyles = styles;
+export const singleEntryTagsAtom = atom<string[]>([]);
+export const ruleInputAtom = atom<string>("");
+export const ruleTagsAtom = atom<string[]>([]);
+
 const ImportCSV = () => { 
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
@@ -23,9 +28,10 @@ const ImportCSV = () => {
     });
     const { classes } = useStyles();
 
-    const [allCsvData, setAllCsvData] = useAtom(allCsvDataAtom);
-    const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
-    const [step, setStep] = useAtom(stepAtom);
+    const setAllCsvData = useSetAtom(allCsvDataAtom);
+    const setUntaggedDescriptions = useSetAtom(untaggedDescriptionsAtom);
+    const setDistinctDescriptions = useSetAtom(distinctDescriptionsAtom);
+    const setStep = useSetAtom(stepAtom);
     
     const [file, setFile] = useState<File | null>(null);
     
@@ -52,6 +58,7 @@ const ImportCSV = () => {
     if (csvMutation.isSuccess) {
         const responseData: any = client.getQueryData(['untaggedDescriptions', 1]);
         setUntaggedDescriptions(responseData);
+        setDistinctDescriptions(responseData);
         setStep(1);
     }
 

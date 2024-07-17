@@ -3,16 +3,15 @@ import ImportCSV from "../../../components/ui/forms/uploadcsv/importcsv";
 import TagData from "../../../components/ui/forms/uploadcsv/tagdata";
 import ReviewData from "../../../components/ui/forms/uploadcsv/review";
 import { atom, useAtom } from "jotai";
-
-export type CsvData = {
-    date: string, 
-    amount: number,
-    description: string,
-    tags?: string[]
-}
+import { CsvData } from "../../../models/CsvData";
+import { NewEntry } from "../../../models/NewEntry";
+import { NewRule } from "../../../models/NewRule";
 
 export const allCsvDataAtom = atom<CsvData[]>([]);
 export const untaggedDescriptionsAtom = atom<string[]>([]);
+export const distinctDescriptionsAtom = atom<string[]>([]);
+export const newEntriesAtom = atom<NewEntry[]>([]);
+export const newRulesAtom = atom<NewRule[]>([]);
 export const stepAtom = atom<number>(0);
 
 export const UploadCSV = () => {

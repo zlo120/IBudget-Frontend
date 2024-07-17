@@ -4,6 +4,7 @@ import Submit from "../submit";
 import { useAtom } from "jotai";
 import { untaggedDescriptionsAtom } from "../../../../../app/routes/app/uploadcsv";
 import { tagsAtom } from "../tagdata";
+import { ruleInputAtom, ruleTagsAtom } from "../importcsv";
 
 const useStyles = styles;
 const CreateRule = () => {
@@ -11,17 +12,29 @@ const CreateRule = () => {
     
     const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
     const [tags, setTags] = useAtom(tagsAtom);
+    const [ruleInput, setRuleInput] = useAtom(ruleInputAtom);
+    const [ruleTags, setRuleTags] = useAtom(ruleTagsAtom);
 
     return (
         <>
             <Typography variant="h5">Create Rule</Typography>
-            <TextField id="standard-basic" label="Rule" placeholder="i.e. Coles" variant="standard" className={`${classes.formItem}`}/>
+            <TextField 
+                id="standard-basic" 
+                label="Rule" 
+                placeholder="i.e. Coles" 
+                variant="standard" 
+                className={`${classes.formItem}`} 
+                value={ruleInput} 
+                onChange={(event) => setRuleInput(event.target.value)}
+            />
             <Autocomplete
                 multiple
                 id="tags-standard"
+                value={ruleTags}
                 options={tags}
                 getOptionLabel={(option) => option}
                 filterSelectedOptions
+                onChange={(event, value) => setRuleTags(value)}
                 renderInput={(params) => (
                 <TextField
                     {...params}

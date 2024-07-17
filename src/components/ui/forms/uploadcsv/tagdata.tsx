@@ -9,23 +9,24 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import { untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
-import { atom, useAtom } from "jotai";
+import { stepAtom, untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
+import { atom, useAtom, useSetAtom } from "jotai";
 import { useTagQuery } from "../../../../api/api";
 
 const useStyles = styles;
+export const isCreateRuleAtom = atom<boolean>(false);
 export const tagsAtom = atom<string[]>([]);
-export const distinctUntaggedCsvDataAtom = atom<string[]>([]);
 
 const TagData = () => {    
     const { classes } = useStyles();
 
     const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
     const [tags, setTags] = useAtom(tagsAtom);
+    const setStep = useSetAtom(stepAtom);
 
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [capturedIndices, setCapturedIndices] = useState<number[]>([]);
-    const [isCreateRule, setIsCreateRule] = useState(false);
+    const [isCreateRule, setIsCreateRule] = useAtom(isCreateRuleAtom);
 
     const [client, tagQuery] = useTagQuery();
     
@@ -44,6 +45,8 @@ const TagData = () => {
     
     if (tagQuery.isError) return <Typography variant="body2">An error occurred: {tagQuery.error.message}</Typography>
     if (tagQuery.isSuccess) setTags(client.getQueryData(['allTags', 1]) as string[]);
+
+    if (untaggedDescriptions.length === 0) setStep(2);
 
     return (
         <>
@@ -90,11 +93,13 @@ const TagData = () => {
                             inputProps={{ 'aria-label': 'create rule switch' }}
                         />
                     </div>
-                {
-                    isCreateRule ? (
-                        <CreateRule />
-                    ) : <TagEntry entryName={untaggedDescriptions[selectedIndex]}/>
-                }
+                <form onSubmit={(event) => event.preventDefault()}>
+                    {
+                        isCreateRule ? (
+                            <CreateRule />
+                        ) : <TagEntry entryName={untaggedDescriptions[selectedIndex]}/>
+                    }
+                </form>
                 </div>
             </div>
         </>
