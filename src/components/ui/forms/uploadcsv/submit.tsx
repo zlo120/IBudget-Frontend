@@ -2,7 +2,7 @@ import { Button, Typography } from "@mui/material";
 import styles from "./uploadcsv.styles";
 
 const useStyles = styles;
-interface SubmitProps {
+type SubmitProps = {
     text?: string,
     buttonText: string
 }

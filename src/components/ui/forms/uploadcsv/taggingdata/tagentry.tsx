@@ -6,7 +6,7 @@ import { untaggedDescriptionsAtom } from "../../../../../app/routes/app/uploadcs
 import { tagsAtom } from "../tagdata";
 
 const useStyles = styles;
-interface TagEntryProps {
+type TagEntryProps = {
     entryName : string
 }
 const TagEntry = (props: TagEntryProps) => {

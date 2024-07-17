@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 
-export interface FinancialFormProps {
+type FinancialFormProps = {
     type: string;
 }
 
