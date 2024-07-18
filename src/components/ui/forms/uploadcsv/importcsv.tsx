@@ -1,7 +1,7 @@
 import { Button, CircularProgress, Typography } from "@mui/material";
 import { useState } from "react";
-import { atom, useAtom, useSetAtom } from "jotai";
-import { stepAtom, allCsvDataAtom, untaggedDescriptionsAtom, distinctDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
+import { atom, useSetAtom } from "jotai";
+import { stepAtom, allCsvDataAtom, untaggedDescriptionsAtom, distinctUntaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
 import { CloudUpload } from "@mui/icons-material";
 import { styled } from '@mui/material/styles';
 import styles from "./uploadcsv.styles";
@@ -30,7 +30,7 @@ const ImportCSV = () => {
 
     const setAllCsvData = useSetAtom(allCsvDataAtom);
     const setUntaggedDescriptions = useSetAtom(untaggedDescriptionsAtom);
-    const setDistinctDescriptions = useSetAtom(distinctDescriptionsAtom);
+    const setDistinctUntaggedDescriptions = useSetAtom(distinctUntaggedDescriptionsAtom);
     const setStep = useSetAtom(stepAtom);
     
     const [file, setFile] = useState<File | null>(null);
@@ -58,7 +58,7 @@ const ImportCSV = () => {
     if (csvMutation.isSuccess) {
         const responseData: any = client.getQueryData(['untaggedDescriptions', 1]);
         setUntaggedDescriptions(responseData);
-        setDistinctDescriptions(responseData);
+        setDistinctUntaggedDescriptions(responseData);
         setStep(1);
     }
 

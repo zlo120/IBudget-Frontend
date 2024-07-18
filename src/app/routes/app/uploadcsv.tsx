@@ -9,7 +9,7 @@ import { NewRule } from "../../../models/NewRule";
 
 export const allCsvDataAtom = atom<CsvData[]>([]);
 export const untaggedDescriptionsAtom = atom<string[]>([]);
-export const distinctDescriptionsAtom = atom<string[]>([]);
+export const distinctUntaggedDescriptionsAtom = atom<string[]>([]);
 export const newEntriesAtom = atom<NewEntry[]>([]);
 export const newRulesAtom = atom<NewRule[]>([]);
 export const stepAtom = atom<number>(0);

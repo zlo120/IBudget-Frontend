@@ -7,54 +7,74 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Submit from "./submit";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { allCsvDataAtom, distinctDescriptionsAtom, newEntriesAtom, newRulesAtom, stepAtom, untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
-import { useState } from "react";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { allCsvDataAtom, distinctUntaggedDescriptionsAtom, newEntriesAtom, newRulesAtom, stepAtom, untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
+import styles from "./uploadcsv.styles";
+import { useUploadCsvData } from "../../../../api/api";
+import { useEffect } from "react";
 
-type ReviewEntry = {
-    entry: string,
-    tags: string[]
-}
+const useStyles = styles;
+export const descriptionTagsMapAtom = atom<Map<string, string[]>>(new Map());
+export const isCompleteAtom = atom<boolean>(false);
 
 const ReviewData = () => { 
-    const rows = [
-        {entry: "K-Fresh", tags: ["Grocery", "Optional"]},
-        {entry: "Kmart", tags: ["Optional"]},
-        {entry: "Big W", tags: ["Grocery", "Optional"]},
-        {entry: "Coles Express", tags: ["Petrol", "Optional"]},
-        {entry: "Stock Exchange Hotel", tags: ["Essentials"]},
-    ];
+    const {classes} = useStyles();
  
     const setStep = useSetAtom(stepAtom);
     const untaggedDescriptions = useAtomValue(untaggedDescriptionsAtom);   
-    const distinctDescriptions = useAtomValue(distinctDescriptionsAtom);
+    const distinctUntaggedDescriptions = useAtomValue(distinctUntaggedDescriptionsAtom);
     const newEntries = useAtomValue(newEntriesAtom);
     const newRules = useAtomValue(newRulesAtom);
+    const setDescriptionTagsMap = useSetAtom(descriptionTagsMapAtom);
+    const [isComplete, setIsComplete] = useAtom(isCompleteAtom);
+    const allCsvData = useAtomValue(allCsvDataAtom);
+    
+    const [client, csvUploadMutation] = useUploadCsvData();
 
     let descriptionTags: Map<string, string[]> = new Map();
-    for (let i = 0; i < distinctDescriptions.length; i++) {
+    for (let i = 0; i < distinctUntaggedDescriptions.length; i++) {
         // check if the description has an entry
         for (let j = 0; j < newEntries.length; j++) {
-            if (distinctDescriptions[i].toLocaleLowerCase() === newEntries[j].captures.toLocaleLowerCase()) {
-                descriptionTags.set(distinctDescriptions[i], newEntries[j].tags);
+            if (distinctUntaggedDescriptions[i].toLocaleLowerCase() === newEntries[j].captures.toLocaleLowerCase()) {
+                descriptionTags.set(distinctUntaggedDescriptions[i], newEntries[j].tags);
                 break;
             }
         }
-        if (descriptionTags.has(distinctDescriptions[i])) continue;
+        if (descriptionTags.has(distinctUntaggedDescriptions[i])) continue;
         // check if a rule captures this description
         for (let j = 0; j < newRules.length; j++) {
-            if (distinctDescriptions[i].toLocaleLowerCase().includes(newRules[j].rule.toLocaleLowerCase())) {
-                descriptionTags.set(distinctDescriptions[i], newRules[j].tags);
+            if (distinctUntaggedDescriptions[i].toLocaleLowerCase().includes(newRules[j].rule.toLocaleLowerCase())) {
+                descriptionTags.set(distinctUntaggedDescriptions[i], newRules[j].tags);
                 break;
             }
         }
     }
+    setDescriptionTagsMap(descriptionTags);
 
     if (untaggedDescriptions.length > 0) setStep(1);
+    if (allCsvData.length < 1) setStep(0);
+    
+    useEffect(() => {
+        if (distinctUntaggedDescriptions.length === 0) {
+            csvUploadMutation.mutate(null);
+            setIsComplete(true);
+        }
+    }, []);
+
+    if (isComplete) 
+        return (
+            <>
+                <div className={`${classes.uploadWidgetContainer}`}>
+                    <div className={`${classes.uploadWidget}`}>
+                        <Typography variant="h5">Complete!</Typography>
+                    </div>
+                </div>
+            </>
+        )
 
     return (
         <>
-            <Typography variant="h5">Reviewing Tagged Entries</Typography>
+            <Typography variant="h5">Reviewing Newly Tagged Entries</Typography>
 
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -65,7 +85,7 @@ const ReviewData = () => {
                     </TableRow>
                     </TableHead>
                     <TableBody>
-                    {distinctDescriptions.map((description) => (
+                    {distinctUntaggedDescriptions.map((description) => (
                         <TableRow
                         key={description}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -86,7 +106,7 @@ const ReviewData = () => {
                 </Table>
             </TableContainer>
 
-            <Submit buttonText="Complete" />
+            <Submit buttonText="Complete & Upload CSV into DB" />
         </>
     )
 }

@@ -39,7 +39,27 @@ export const Search = () => {
     }
     const handleFilterChange = (event: SelectChangeEvent) => {
         setSortByToDisplay(event.target.value as string);
-        searchQuery.data.allExpenses.sort((a: RowData, b: RowData) => {
+        dataDisplayed === "Expense" ? allExpenses.sort((a: RowData, b: RowData) => {
+            switch (event.target.value as string) {
+                case "Amount (Ascending)":
+                    return a.amount - b.amount;
+                case "Amount (Descending)":
+                    return b.amount - a.amount;
+                case "Date (Ascending)":
+                    const dateA: Date = new Date(convertDateFormat(a.date));
+                    const dateB: Date = new Date(convertDateFormat(b.date));
+                    if (dateA < dateB) return -1;
+                    return 1;                    
+                case "Date (Descending)":
+                    const firstDate: Date = new Date(convertDateFormat(a.date));
+                    const secondDate: Date = new Date(convertDateFormat(b.date));
+                    if (firstDate >= secondDate) return -1;
+                    return 1;
+                default:
+                    return a.id - b.id;
+            }
+        })
+        : allIncome.sort((a: RowData, b: RowData) => {
             switch (event.target.value as string) {
                 case "Amount (Ascending)":
                     return a.amount - b.amount;
@@ -67,6 +87,18 @@ export const Search = () => {
     if (searchQuery.isPending || thisWeeksOnlySearchQuery.isPending) return <><Typography variant="h4">Loading...</Typography></>
     if (searchQuery.error) return <><Typography variant="h4">An error has occured when querying all the data: {searchQuery.error.message}</Typography></>
     if (thisWeeksOnlySearchQuery.error) return <><Typography variant="h4">An error has occured when querying this week's data: {thisWeeksOnlySearchQuery.error.message}</Typography></>
+
+    const allExpenses: RowData[] = searchQuery.data
+        .map((month: any) => {
+            return month.totalExpenses;
+        })
+        .flat();
+        
+    const allIncome: RowData[] = searchQuery.data
+        .map((month: any) => {
+            return month.totalIncome;
+        })
+        .flat();
 
     return (
         <>
@@ -112,6 +144,7 @@ export const Search = () => {
                                 value={sortByToDisplay}
                                 label="Data"
                                 onChange={handleFilterChange}
+                                disabled
                             >
                                 {sortByCategories.map((text) => (                                    
                                     <MenuItem value={text}>{text}</MenuItem>
@@ -119,7 +152,7 @@ export const Search = () => {
                             </Select>
                         </FormControl>
                         <FormControl fullWidth>
-                            <FormControlLabel control={<Switch onChange={handleThisWeekOnlyChange}/>} label="This Week Only" />
+                            <FormControlLabel control={<Switch onChange={handleThisWeekOnlyChange} disabled/>} label="This Week Only" />
                         </FormControl>
                     </div>
                 </CardContent>
@@ -130,62 +163,94 @@ export const Search = () => {
                             <TableRow>
                                 <TableCell>ID</TableCell>
                                 <TableCell>Amount</TableCell>
-                                <TableCell>Tags</TableCell>
                                 <TableCell>Date</TableCell>
+                                <TableCell>Description</TableCell>
+                                <TableCell>Tags</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            { isThisWeekOnly ? thisWeeksOnlySearchQuery.data.allExpenses
-                                .map((row: RowData) => {
-                                    if (selectedTags.length === 0) return row
-                                    for (let i = 0; i < selectedTags.length; i++) {
-                                        if (row.tags.includes(selectedTags[i])) {
-                                            return row;
+                            { !isThisWeekOnly && dataDisplayed === "Income" ?
+                                allIncome
+                                    .filter((row: RowData) => {
+                                        if (selectedTags.length === 0) return true;
+                                        for (let i = 0; i < selectedTags.length; i++) {
+                                            if (row.tags.includes(selectedTags[i])) {
+                                                return true;
+                                            }
                                         }
-                                    }
-                                })
-                                .filter((row: RowData) => row !== undefined)
-                                .slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage)
-                                .map((row: RowData) => 
-                                    <TableRow
-                                        key={row.id}
-                                        sx={{'&:last-child td, &:last-child th': { border: 0 }}}
-                                    >
-                                        <TableCell>{row.id}</TableCell>
-                                        <TableCell>${row.amount}</TableCell>
-                                        <TableCell>{row.tags.map((tag) => (
-                                                <Chip label={tag} style={{marginRight: "5px"}}/>
-                                            ))}
-                                        </TableCell>
-                                        <TableCell>{row.date}</TableCell>
-                                    </TableRow>
-                                )
+                                        return false;
+                                    })
+                                    .slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage)
+                                    .map((row: RowData) => 
+                                        <TableRow
+                                            key={row.id}
+                                            sx={{'&:last-child td, &:last-child th': { border: 0 }}}
+                                        >
+                                            <TableCell>{row.id}</TableCell>
+                                            <TableCell>${row.amount}</TableCell>
+                                            <TableCell>{row.date}</TableCell>
+                                            <TableCell>{row.description}</TableCell>
+                                            <TableCell>{row.tags.map((tag) => (
+                                                    <Chip label={tag} style={{marginRight: "5px"}}/>
+                                                ))}
+                                            </TableCell>
+                                        </TableRow>
+                                    ) 
                                 // else
-                                : searchQuery.data.allExpenses
-                                .map((row: RowData) => {
-                                    if (selectedTags.length === 0) return row
-                                    for (let i = 0; i < selectedTags.length; i++) {
-                                        if (row.tags.includes(selectedTags[i])) {
-                                            return row;
-                                        }
-                                    }
-                                })
-                                .filter((row: RowData) => row !== undefined)
-                                .slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage)
-                                .map((row: RowData) => 
-                                    <TableRow
-                                        key={row.id}
-                                        sx={{'&:last-child td, &:last-child th': { border: 0 }}}
-                                    >
-                                        <TableCell>{row.id}</TableCell>
-                                        <TableCell>${row.amount}</TableCell>
-                                        <TableCell>{row.tags.map((tag) => (
-                                                <Chip label={tag} style={{marginRight: "5px"}}/>
-                                            ))}
-                                        </TableCell>
-                                        <TableCell>{row.date}</TableCell>
-                                    </TableRow>
-                                )
+                                : !isThisWeekOnly && dataDisplayed === "Expense" ?
+                                    allExpenses
+                                        .filter((row: RowData) => {
+                                            if (selectedTags.length === 0) return true;
+                                            for (let i = 0; i < selectedTags.length; i++) {
+                                                if (row.tags.includes(selectedTags[i])) {
+                                                    return true;
+                                                }
+                                            }
+                                            return false;
+                                        })
+                                        .slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage)
+                                        .map((row: RowData) => 
+                                            <TableRow
+                                                key={row.id}
+                                                sx={{'&:last-child td, &:last-child th': { border: 0 }}}
+                                            >
+                                                <TableCell>{row.id}</TableCell>
+                                                <TableCell>${row.amount * -1}</TableCell>
+                                                <TableCell>{row.date}</TableCell>
+                                                <TableCell>{row.description}</TableCell>
+                                                <TableCell>{row.tags.map((tag) => (
+                                                        <Chip label={tag} style={{marginRight: "5px"}}/>
+                                                    ))}
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                : null
+                                // thisWeeksOnlySearchQuery.data.allExpenses
+                                //     .map((row: RowData) => {
+                                //         if (selectedTags.length === 0) return row
+                                //         for (let i = 0; i < selectedTags.length; i++) {
+                                //             if (row.tags.includes(selectedTags[i])) {
+                                //                 return row;
+                                //             }
+                                //         }
+                                //     })
+                                //     .filter((row: RowData | undefined) => row !== undefined)
+                                //     .slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage)
+                                //     .map((row: RowData) => 
+                                //         <TableRow
+                                //             key={row.id}
+                                //             sx={{'&:last-child td, &:last-child th': { border: 0 }}}
+                                //         >
+                                //             <TableCell>{row.id}</TableCell>
+                                //             <TableCell>${row.amount}</TableCell>
+                                //             <TableCell>{row.description}</TableCell>
+                                //             <TableCell>{row.tags.map((tag) => (
+                                //                     <Chip label={tag} style={{marginRight: "5px"}}/>
+                                //                 ))}
+                                //             </TableCell>
+                                //             <TableCell>{row.date}</TableCell>
+                                //         </TableRow>
+                                //     )
                             }
                         </TableBody>
                     </Table>
@@ -193,7 +258,13 @@ export const Search = () => {
             <TablePagination
                 rowsPerPageOptions={[15, 25, 50]}
                 component="div"
-                count={isThisWeekOnly ? thisWeeksOnlySearchQuery.data.allExpenses.length : searchQuery.data.allExpenses.length}
+                count={
+                    !isThisWeekOnly && dataDisplayed === "Income" ? allIncome.length 
+                    : !isThisWeekOnly && dataDisplayed === "Expense" ? allExpenses.length
+                    : isThisWeekOnly && dataDisplayed === "Income" ? allIncome.length 
+                    : isThisWeekOnly && dataDisplayed === "Expense" ? allExpenses.length
+                    : 0
+                }
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

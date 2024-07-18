@@ -1,12 +1,14 @@
 import { Button, Typography } from "@mui/material";
 import styles from "./uploadcsv.styles";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ruleInputAtom, ruleTagsAtom, singleEntryTagsAtom } from "./importcsv";
 import { isCreateRuleAtom } from "./tagdata";
 import { NewEntry } from "../../../../models/NewEntry";
 import { NewRule } from "../../../../models/NewRule";
 import { entryNameAtom } from "./taggingdata/tagentry";
-import { newEntriesAtom, newRulesAtom, untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
+import { allCsvDataAtom, distinctUntaggedDescriptionsAtom, newEntriesAtom, newRulesAtom, stepAtom, untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
+import { descriptionTagsMapAtom, isCompleteAtom } from "./review";
+import { useUploadCsvData, useUploadNewEntryRule } from "../../../../api/api";
 
 const useStyles = styles;
 type SubmitProps = {
@@ -26,6 +28,14 @@ const Submit = (props: SubmitProps) => {
     const [newEntries, setNewEntries] = useAtom(newEntriesAtom);
     const [newRules, setNewRules] = useAtom(newRulesAtom);
     const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
+    const distinctUntaggedDescriptions = useAtomValue(distinctUntaggedDescriptionsAtom);
+    const step = useAtomValue(stepAtom);
+    const descriptionTagsMap = useAtomValue(descriptionTagsMapAtom);
+    const allCsvData = useAtomValue(allCsvDataAtom);
+    const setIsComplete = useSetAtom(isCompleteAtom);
+
+    const [csvUploadClient, csvUploadMutation] = useUploadCsvData();
+    const [uploadNewEntryRuleClient, uploadNewEntryRuleMutation] = useUploadNewEntryRule();   
 
     const getAppropriateFormData = (): NewEntry|NewRule => {
         if (isCreateRule) {
@@ -60,13 +70,20 @@ const Submit = (props: SubmitProps) => {
         }));
     }
     const handleSubmit = () => {
-        if (isCreateRule && ruleTags.length === 0) return;
-        else if (!isCreateRule && singleEntryTags.length === 0) return;
-        if (isCreateRule) createRule();
-        else createEntry();
-        setRuleInput("");
-        setRuleTags([]);
-        setSingleEntryTags([]);
+        if (step === 1) {
+            if (isCreateRule && ruleTags.length === 0) return;
+            else if (!isCreateRule && singleEntryTags.length === 0) return;
+            if (isCreateRule) createRule();
+            else createEntry();
+            setRuleInput("");
+            setRuleTags([]);
+            setSingleEntryTags([]);
+        }
+        else if (step === 2) {
+            uploadNewEntryRuleMutation.mutate(null);
+            csvUploadMutation.mutate(null);
+            setIsComplete(true);            
+        }
     }
     
     return (
