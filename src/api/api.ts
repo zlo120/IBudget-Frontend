@@ -3,10 +3,11 @@ import { NewEntryRulesPayload } from "../models/NewEntryRulesPayload";
 import { useAtomValue } from "jotai";
 import { allCsvDataAtom, newEntriesAtom, newRulesAtom } from "../app/routes/app/uploadcsv";
 import { Md5 } from "ts-md5";
+import { selectedTagAtom } from "../app/routes/app/managetags";
 export const useTagQuery = (): [client: QueryClient, tagQuery: UseQueryResult] => {
     const client = useQueryClient();    
     const tagQuery = useQuery({
-        queryKey: ['allTags'],
+        queryKey: ['allTagsQuery'],
         queryFn: () => fetch('https://localhost:7163/api/UserDictionary/GetAllTags')
             .then(res => res.json())
             .then((res) => { 
@@ -111,4 +112,36 @@ export const useUploadCsvData = (): [client: QueryClient, csvUploadMutation: Use
     });
 
     return [ client, csvUploadMutation ];
+}
+export const useCreateTag = (): [client: QueryClient, createTagMutation: UseMutationResult] => {
+    const tag = useAtomValue(selectedTagAtom);
+    const client = useQueryClient();
+    const createTagMutation = useMutation({
+        mutationFn: async (event: any): Promise<Response> => {
+            return fetch('https://localhost:7163/api/UserDictionary/CreateTag', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(tag)
+            })},
+    });
+
+    return  [ client, createTagMutation ];
+}
+export const useDeleteTag = (): [client: QueryClient, deleteTagMutation: UseMutationResult] => {
+    const tag = useAtomValue(selectedTagAtom);
+    const client = useQueryClient();
+    const deleteTagMutation = useMutation({
+        mutationFn: async (event: any): Promise<Response> => {
+            return fetch('https://localhost:7163/api/UserDictionary/DeleteTag', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(tag)
+            })},
+    });
+
+    return  [ client, deleteTagMutation ];
 }

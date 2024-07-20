@@ -39,6 +39,13 @@ const createRouter = (queryClient: QueryClient) =>
                         return { Component: UploadCSV };
                     },
                 },
+                {
+                    path: 'managetags',
+                    lazy: async () => {
+                        const { ManageTags } = await import('./app/managetags');
+                        return { Component: ManageTags };
+                    },
+                },
             ]
         }
     ]);

@@ -1,5 +1,5 @@
 import styles from './sidebar.styles';
-import { SpaceDashboardOutlined, Search, FormatAlignLeft, CalendarToday, Event, UploadFile, FmdBad } from '@mui/icons-material';
+import { Search, CalendarToday, UploadFile, FmdBad } from '@mui/icons-material';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
@@ -8,7 +8,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 const useStyles = styles;
 const drawerWidth = 240;
@@ -20,6 +20,8 @@ const getIcon = (index: number) => {
             return (<UploadFile />);
         case 2:
             return (<CalendarToday />);
+        case 3:
+            return (<LocalOfferIcon />);
         default:
             return (<FmdBad />);
     }
@@ -32,11 +34,13 @@ const getHref = (index: number) => {
             return "/uploadcsv";
         case 2:
             return "/thismonth";
+        case 3:
+            return "/managetags";
         default:
             return "/search";
     }
 }
-const sideBarItems = ['Search', 'Upload CSV', 'This Month'];
+const sideBarItems = ['Search', 'Upload CSV', 'This Month', 'Manage Tags'];
 const drawer = (
     <Box sx={{overflow: "auto"}}>
         <List>
