@@ -9,6 +9,7 @@ import Paper from '@mui/material/Paper';
 import { useState } from "react";
 import { RowData } from "../../../models/RowData";
 import { useSearchAllData, useSearchThisWeekData, useTagQuery } from "../../../api/api";
+import { Tag } from "../../../models/Tag";
 
 export const Search = () => {     
     const searchQuery = useSearchAllData();
@@ -110,7 +111,7 @@ export const Search = () => {
                         sx={{mr : 5}} 
                         style={{width: "100%"}} 
                         id="search_input" 
-                        options={client.getQueryData(['allTags', 1]) as string[]}
+                        options={(client.getQueryData(['allTags', 1]) as Tag[]).map(tag=>tag.tagName)}
                         filterSelectedOptions
                         onChange={(event, value) => setSelectedTags(value as string[])}
                         renderInput={(params) => (

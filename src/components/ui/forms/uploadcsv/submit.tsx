@@ -1,6 +1,6 @@
 import { Button, Typography } from "@mui/material";
 import styles from "./uploadcsv.styles";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ruleInputAtom, ruleTagsAtom, singleEntryTagsAtom } from "./importcsv";
 import { isCreateRuleAtom } from "./tagdata";
 import { NewEntry } from "../../../../models/NewEntry";
@@ -8,13 +8,18 @@ import { NewRule } from "../../../../models/NewRule";
 import { entryNameAtom } from "./taggingdata/tagentry";
 import { allCsvDataAtom, distinctUntaggedDescriptionsAtom, newEntriesAtom, newRulesAtom, stepAtom, untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
 import { descriptionTagsMapAtom, isCompleteAtom } from "./review";
-import { useUploadCsvData, useUploadNewEntryRule } from "../../../../api/api";
+import { usePostNewEntry, usePostNewRule, useUploadCsvData, useUploadNewEntryRule } from "../../../../api/api";
 
 const useStyles = styles;
 type SubmitProps = {
     text?: string,
     buttonText: string
 }
+
+export const newRuleAtom = atom<NewRule>({} as NewRule);
+export const newRuleCounterAtom = atom<number>(-1);
+export const newEntryAtom = atom<NewEntry>({} as NewEntry);
+export const newEntryCounterAtom = atom<number>(-1);
 
 const Submit = (props: SubmitProps) => {
     const { classes } = useStyles();
@@ -33,9 +38,15 @@ const Submit = (props: SubmitProps) => {
     const descriptionTagsMap = useAtomValue(descriptionTagsMapAtom);
     const allCsvData = useAtomValue(allCsvDataAtom);
     const setIsComplete = useSetAtom(isCompleteAtom);
+    const setNewRule = useSetAtom(newRuleAtom);
+    const setNewEntry = useSetAtom(newEntryAtom);
+    const [newRuleCounter, setNewRuleCounter] = useAtom(newRuleCounterAtom);
+    const [newEntryCounter, setNewEntryCounter] = useAtom(newEntryCounterAtom);
 
     const [csvUploadClient, csvUploadMutation] = useUploadCsvData();
-    const [uploadNewEntryRuleClient, uploadNewEntryRuleMutation] = useUploadNewEntryRule();   
+    const [uploadNewEntryRuleClient, uploadNewEntryRuleMutation] = useUploadNewEntryRule();  
+    const [postNewRuleClient, uploadNewRuleMutation] = usePostNewRule();
+    const [postNewEntryClient, uploadNewEntryMutation] = usePostNewEntry(); 
 
     const getAppropriateFormData = (): NewEntry|NewRule => {
         if (isCreateRule) {
@@ -58,6 +69,11 @@ const Submit = (props: SubmitProps) => {
         setNewEntries([...newEntries, newEntry]);
         // delete the entry from the untaggedDescriptions array
         setUntaggedDescriptions(untaggedDescriptions.filter((entry) => entry !== singleEntryInput));
+        
+        // auto save: call api
+        setNewEntry(newEntry);
+        setNewEntryCounter(newEntryCounter + 1);
+        uploadNewEntryMutation.mutate(null);
     }
     const createRule = () => {
         const newRule = getAppropriateFormData() as NewRule;
@@ -68,6 +84,11 @@ const Submit = (props: SubmitProps) => {
             if (entry.toLocaleLowerCase().includes(newRule.rule.toLocaleLowerCase())) return false;
             return true;
         }));
+
+        // auto save: call api
+        setNewRule(newRule);
+        setNewRuleCounter(newRuleCounter + 1);
+        uploadNewRuleMutation.mutate(null);
     }
     const handleSubmit = () => {
         if (step === 1) {

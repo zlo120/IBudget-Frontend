@@ -3,7 +3,8 @@ import { NewEntryRulesPayload } from "../models/NewEntryRulesPayload";
 import { useAtomValue } from "jotai";
 import { allCsvDataAtom, newEntriesAtom, newRulesAtom } from "../app/routes/app/uploadcsv";
 import { Md5 } from "ts-md5";
-import { selectedTagAtom } from "../app/routes/app/managetags";
+import { selectedTagAtom, trackedTagAtom } from "../app/routes/app/managetags";
+import { newEntryAtom, newEntryCounterAtom, newRuleAtom, newRuleCounterAtom } from "../components/ui/forms/uploadcsv/submit";
 export const useTagQuery = (): [client: QueryClient, tagQuery: UseQueryResult] => {
     const client = useQueryClient();    
     const tagQuery = useQuery({
@@ -91,6 +92,40 @@ export const useUploadNewEntryRule = (): [client: QueryClient, csvUploadMutation
 
     return [ client, csvUploadMutation ];
 }
+export const usePostNewRule = (): [client: QueryClient, csvMutation: UseMutationResult] => {
+    const newRule = useAtomValue(newRuleAtom);
+    const newRuleCounter = useAtomValue(newRuleCounterAtom)
+    const client = useQueryClient();
+    const csvUploadMutation = useMutation({
+        mutationFn: async (event: any): Promise<Response> => {
+            return fetch('https://localhost:7163/api/CSVParser/CreateNewRule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newRule)
+            })},
+        onSuccess: (res) => res.json().then(res => client.setQueryData(['newRule', newRuleCounter], res)),
+    });
+    return [ client, csvUploadMutation ];
+}
+export const usePostNewEntry = (): [client: QueryClient, csvMutation: UseMutationResult] => {
+    const newEntry = useAtomValue(newEntryAtom);
+    const newEntryCounter = useAtomValue(newEntryCounterAtom)
+    const client = useQueryClient();
+    const csvUploadMutation = useMutation({
+        mutationFn: async (event: any): Promise<Response> => {
+            return fetch('https://localhost:7163/api/CSVParser/CreateNewEntry', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newEntry)
+            })},
+        onSuccess: (res) => res.json().then(res => client.setQueryData(['newEntry', newEntryCounter], res)),
+    });
+    return [ client, csvUploadMutation ];
+}
 export const useUploadCsvData = (): [client: QueryClient, csvUploadMutation: UseMutationResult] => {
     const allCsvData = useAtomValue(allCsvDataAtom);
     const client = useQueryClient();
@@ -115,7 +150,12 @@ export const useUploadCsvData = (): [client: QueryClient, csvUploadMutation: Use
 }
 export const useCreateTag = (): [client: QueryClient, createTagMutation: UseMutationResult] => {
     const tag = useAtomValue(selectedTagAtom);
+    const isTrackedTag = useAtomValue(trackedTagAtom);
     const client = useQueryClient();
+    let body = {
+        TagName: tag,
+        IsTracked: isTrackedTag
+    }
     const createTagMutation = useMutation({
         mutationFn: async (event: any): Promise<Response> => {
             return fetch('https://localhost:7163/api/UserDictionary/CreateTag', {
@@ -123,7 +163,7 @@ export const useCreateTag = (): [client: QueryClient, createTagMutation: UseMuta
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(tag)
+                body: JSON.stringify(body)
             })},
     });
 

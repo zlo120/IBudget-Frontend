@@ -12,16 +12,18 @@ import Divider from '@mui/material/Divider';
 import { stepAtom, untaggedDescriptionsAtom } from "../../../../app/routes/app/uploadcsv";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { useTagQuery } from "../../../../api/api";
+import { Tag } from "../../../../models/Tag";
 
 const useStyles = styles;
 export const isCreateRuleAtom = atom<boolean>(false);
-export const tagsAtom = atom<string[]>([]);
+export const tagsAtom = atom<Tag[]>([]);
 
 const TagData = () => {    
     const { classes } = useStyles();
 
     const [untaggedDescriptions, setUntaggedDescriptions] = useAtom(untaggedDescriptionsAtom);
     const [tags, setTags] = useAtom(tagsAtom);
+    const [tagsStrings, setTagsStrings] = useState<string[]>([]);
     const setStep = useSetAtom(stepAtom);
 
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -44,7 +46,7 @@ const TagData = () => {
     }
     
     if (tagQuery.isError) return <Typography variant="body2">An error occurred: {tagQuery.error.message}</Typography>
-    if (tagQuery.isSuccess) setTags(client.getQueryData(['allTags', 1]) as string[]);
+    if (tagQuery.isSuccess) setTags(client.getQueryData(['allTags', 1]) as Tag[]);
 
     if (untaggedDescriptions.length === 0) setStep(2);
 

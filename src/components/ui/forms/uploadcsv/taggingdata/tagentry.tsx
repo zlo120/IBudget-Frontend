@@ -27,7 +27,8 @@ const TagEntry = (props: TagEntryProps) => {
             <Autocomplete
                 multiple
                 id="tags-standard"
-                options={tags}
+                options={
+                    tags.map(tag=> tag.tagName)}
                 value={singleEntryTags}
                 getOptionLabel={(option) => option}
                 filterSelectedOptions

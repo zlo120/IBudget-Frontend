@@ -5,6 +5,7 @@ import { useAtom } from "jotai";
 import { untaggedDescriptionsAtom } from "../../../../../app/routes/app/uploadcsv";
 import { tagsAtom } from "../tagdata";
 import { ruleInputAtom, ruleTagsAtom } from "../importcsv";
+import { Tag } from "../../../../../models/Tag";
 
 const useStyles = styles;
 const CreateRule = () => {
@@ -31,7 +32,8 @@ const CreateRule = () => {
                 multiple
                 id="tags-standard"
                 value={ruleTags}
-                options={tags}
+                options={
+                    tags.map(tag=> tag.tagName)}
                 getOptionLabel={(option) => option}
                 filterSelectedOptions
                 onChange={(event, value) => setRuleTags(value)}

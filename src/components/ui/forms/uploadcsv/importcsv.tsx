@@ -49,6 +49,7 @@ const ImportCSV = () => {
             complete: (result) => {
                 console.log("completed parsing...");
                 setAllCsvData(result.data as CsvData[]);
+                console.log(result.data)
                 csvMutation.mutate(result.data);
             }
         });
